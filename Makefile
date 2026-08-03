@@ -3,10 +3,13 @@
 PYTHON ?= python3
 SERVICE_URL ?= http://localhost:8080
 
-.PHONY: help example smoke baseline burst offline adversarial
+.PHONY: help example smoke baseline burst offline adversarial test up run down logs
 
 help:
 	@echo "Targets:"
+	@echo "  run            build + start the stack (mosquitto + redis + service) in the foreground"
+	@echo "  up             same, detached; down stops it; logs tails the service"
+	@echo "  test           run the Go unit + property tests"
 	@echo "  example        run the example stub service on :8080 (replace with yours)"
 	@echo "  smoke          30s baseline run against \$$SERVICE_URL + scorecard"
 	@echo "  baseline       60s baseline"
@@ -15,6 +18,25 @@ help:
 	@echo "  adversarial    4min run combining burst + offline + clock skew"
 	@echo
 	@echo "Override SERVICE_URL=... or DEVICES=... as needed."
+
+# --- solution service (Go + Docker Compose) ---
+
+test:
+	go test ./...
+
+run:
+	docker-compose up --build
+
+up:
+	docker-compose up --build -d
+
+down:
+	docker-compose down -v
+
+logs:
+	docker-compose logs -f service
+
+# --- provided evaluation harness ---
 
 DEVICES ?= 50
 
